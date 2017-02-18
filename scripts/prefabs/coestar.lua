@@ -14,12 +14,12 @@ local start_inv = {
 -- When the character is revived from human
 local function onbecamehuman(inst)
 	-- Set speed when reviving from ghost (optional)
-	inst.components.locomotor:SetExternalSpeedMultiplier(inst, "esctemplate_speed_mod", 1)
+	inst.components.locomotor:SetExternalSpeedMultiplier(inst, "coestar_speed_mod", 1)
 end
 
 local function onbecameghost(inst)
 	-- Remove speed modifier when becoming a ghost
-   inst.components.locomotor:RemoveExternalSpeedMultiplier(inst, "esctemplate_speed_mod")
+   inst.components.locomotor:RemoveExternalSpeedMultiplier(inst, "coestar_speed_mod")
 end
 
 -- When loading or spawning the character
@@ -38,7 +38,7 @@ end
 -- This initializes for both the server and client. Tags can be added here.
 local common_postinit = function(inst) 
 	-- Minimap icon
-	inst.MiniMapEntity:SetIcon( "esctemplate.tex" )
+	inst.MiniMapEntity:SetIcon( "coestar.tex" )
 end
 
 -- This initializes for the server only. Components are added here.
@@ -65,4 +65,4 @@ local master_postinit = function(inst)
 	
 end
 
-return MakePlayerCharacter("esctemplate", prefabs, assets, common_postinit, master_postinit, start_inv)
+return MakePlayerCharacter("coestar", prefabs, assets, common_postinit, master_postinit, start_inv)
