@@ -1,5 +1,6 @@
 PrefabFiles = {
 	"coestar",
+	"coehort",
 	"coestar_none",
 }
 
@@ -54,5 +55,5 @@ STRINGS.NAMES.COESTAR = "Coestar"
 AddMinimapAtlas("images/map_icons/coestar.xml")
 
 -- Add mod character to mod character list. Also specify a gender. Possible genders are MALE, FEMALE, ROBOT, NEUTRAL, and PLURAL.
-AddModCharacter("coestar", "FEMALE")
+AddModCharacter("coestar", "MALE")
 
