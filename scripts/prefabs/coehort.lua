@@ -236,11 +236,8 @@ local function create_chester()
     inst.entity:AddNetwork()
     inst.entity:AddLightWatcher()
 
-    MakeCharacterPhysics(inst, 75, .5)
-    inst.Physics:SetCollisionGroup(COLLISION.CHARACTERS)
-    inst.Physics:ClearCollisionMask()
-    inst.Physics:CollidesWith(COLLISION.WORLD)
-    inst.Physics:CollidesWith(COLLISION.CHARACTERS)
+    MakeFlyingCharacterPhysics(inst, 1, .5)
+    
 
     inst:AddTag("companion")
     inst:AddTag("character")
