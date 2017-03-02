@@ -3,6 +3,7 @@ local brain = require "brains/coehortbrain"
 
 local WAKE_TO_FOLLOW_DISTANCE = 14
 local SLEEP_NEAR_LEADER_DISTANCE = 7
+local COLOR_TWEEN_SPEED = 2
 
 local assets =
 {
@@ -19,11 +20,12 @@ local assets =
     Asset("MINIMAP_IMAGE", "chester"),
     Asset("MINIMAP_IMAGE", "chestershadow"),
     Asset("MINIMAP_IMAGE", "chestersnow"),
+	
+	Asset("ANIM", "anim/coehort.zip"),
 }
 
 local prefabs =
 {
-    "chester_eyebone",
     "chesterlight",
     "chester_transform_fx",
     "globalmapiconunderfog",
@@ -77,135 +79,8 @@ local function OnStartFollowing(inst)
     inst:AddTag("companion")
 end
 
-local function MorphShadowChester(inst)
-    inst.AnimState:SetBuild("chester_shadow_build")
-    inst:AddTag("spoiler")
-    inst.MiniMapEntity:SetIcon("chestershadow.png")
-    inst.components.maprevealable:SetIcon("chestershadow.png")
-
-    inst.components.container:WidgetSetup("shadowchester")
-
-    local leader = inst.components.follower.leader
-    if leader ~= nil then
-        inst.components.follower.leader:MorphShadowEyebone()
-    end
-
-    inst.ChesterState = "SHADOW"
-    inst._isshadowchester:set(true)
-end
-
-local function MorphSnowChester(inst)
-    inst.AnimState:SetBuild("chester_snow_build")
-    inst:AddTag("fridge")
-    inst.MiniMapEntity:SetIcon("chestersnow.png")
-    inst.components.maprevealable:SetIcon("chestersnow.png")
-
-    local leader = inst.components.follower.leader
-    if leader ~= nil then
-        inst.components.follower.leader:MorphSnowEyebone()
-    end
-
-    inst.ChesterState = "SNOW"
-    inst._isshadowchester:set(false)
-end
-
---[[
-local function MorphNormalChester(inst)
-    inst.AnimState:SetBuild("chester_build")
-    inst:RemoveTag("fridge")
-    inst:RemoveTag("spoiler")
-    inst.MiniMapEntity:SetIcon("chester.png")
-    inst.components.maprevealable:SetIcon("chester.png")
-
-    inst.components.container:WidgetSetup("chester")
-
-    local leader = inst.components.follower.leader
-    if leader ~= nil then
-        inst.components.follower.leader:MorphNormalEyebone()
-    end
-
-    inst.ChesterState = "NORMAL"
-    inst._isshadowchester:set(false)
-end
---]]
-
-local function CanMorph(inst)
-    if inst.ChesterState ~= "NORMAL" or not TheWorld.state.isfullmoon then
-        return false, false
-    end
-
-    local container = inst.components.container
-    if container:IsOpen() then
-        return false, false
-    end
-
-    local canShadow = true
-    local canSnow = true
-
-    for i = 1, container:GetNumSlots() do
-        local item = container:GetItemInSlot(i)
-        if item == nil then
-            return false, false
-        end
-
-        canShadow = canShadow and item.prefab == "nightmarefuel"
-        canSnow = canSnow and item.prefab == "bluegem"
-
-        if not (canShadow or canSnow) then
-            return false, false
-        end
-    end
-
-    return canShadow, canSnow
-end
-
-local function CheckForMorph(inst)
-    local canShadow, canSnow = CanMorph(inst)
-    if canShadow or canSnow then
-        inst.sg:GoToState("transition")
-    end
-end
-
-local function DoMorph(inst, fn)
-    inst.MorphChester = nil
-    inst:StopWatchingWorldState("isfullmoon", CheckForMorph)
-    inst:RemoveEventCallback("onclose", CheckForMorph)
-    fn(inst)
-end
-
-local function MorphChester(inst)
-    local canShadow, canSnow = CanMorph(inst)
-    if not (canShadow or canSnow) then
-        return
-    end
-
-    local container = inst.components.container
-    for i = 1, container:GetNumSlots() do
-        container:RemoveItem(container:GetItemInSlot(i)):Remove()
-    end
-
-    DoMorph(inst, canShadow and MorphShadowChester or MorphSnowChester)
-end
-
 local function OnSave(inst, data)
-    data.ChesterState = inst.ChesterState
-end
 
-local function OnPreLoad(inst, data)
-    if data == nil then
-        return
-    elseif data.ChesterState == "SHADOW" then
-        DoMorph(inst, MorphShadowChester)
-    elseif data.ChesterState == "SNOW" then
-        DoMorph(inst, MorphSnowChester)
-    end
-end
-
-local function OnIsShadowChesterDirty(inst)
-    if inst._isshadowchester:value() ~= inst._clientshadowmorphed then
-        inst._clientshadowmorphed = inst._isshadowchester:value()
-        inst.replica.container:WidgetSetup(inst._clientshadowmorphed and "shadowchester" or nil)
-    end
 end
 
 local function OnHaunt(inst)
@@ -223,6 +98,22 @@ local function LinkToPlayer(inst, player)
     inst._playerlink = player
     player.coehort = inst
 	player.components.leader:AddFollower(inst, true)  	
+end
+
+local function TweenBlue(inst)
+	inst.components.colourtweener:StartTween({.0828, .4020, 1, 1}, COLOR_TWEEN_SPEED, function()
+		inst:DoTaskInTime(1, function()
+			inst:PushEvent("tween_blue_end")
+		end)
+	end)
+end
+
+local function TweenPink(inst)
+	inst.components.colourtweener:StartTween({.4349, .2442 , .3209, 1}, COLOR_TWEEN_SPEED, function()
+		inst:DoTaskInTime(1, function()
+			inst:PushEvent("tween_pink_end")
+		end)		
+	end)
 end
 
 local function create_chester()
@@ -249,8 +140,8 @@ local function create_chester()
     inst.MiniMapEntity:SetIcon("chester.png")
     inst.MiniMapEntity:SetCanUseCache(false)
 
-    inst.AnimState:SetBank("chester")
-    inst.AnimState:SetBuild("chester_build")
+    inst.AnimState:SetBank("coehort")
+    inst.AnimState:SetBuild("coehort")
 
     inst.DynamicShadow:SetSize(2, 1.5)
 
@@ -261,9 +152,9 @@ local function create_chester()
     if not TheWorld.ismastersim then
         return inst
     end
-
+	
     ------------------------------------------
-
+	
     inst:AddComponent("combat")
     inst.components.combat.hiteffectsymbol = "chester_body"
     inst.components.combat:SetKeepTargetFunction(ShouldKeepTarget)
@@ -281,13 +172,12 @@ local function create_chester()
 
     inst:AddComponent("follower")
 
-
     inst:AddComponent("knownlocations")
 
     MakeSmallBurnableCharacter(inst, "chester_body")
 
     inst:AddComponent("container")
-    inst.components.container:WidgetSetup("shadowchester")
+    inst.components.container:WidgetSetup("icebox")
 	inst.components.container.onopenfn = OnOpen
     inst.components.container.onclosefn = OnClose
 
@@ -296,23 +186,47 @@ local function create_chester()
     inst.components.sleeper.testperiod = GetRandomWithVariance(6, 2)
     inst.components.sleeper:SetSleepTest(ShouldSleep)
     inst.components.sleeper:SetWakeTest(ShouldWakeUp)
+	
+	inst:AddComponent("colourtweener")
+	inst.AnimState:SetMultColour(.0828, .4020, .5152, 1)
+	inst.AnimState:SetLightOverride(3)
+	inst:ListenForEvent("tween_blue_end", TweenPink)
+	inst:ListenForEvent("tween_pink_end", TweenBlue)
+	
+	inst.entity:AddLight()
+    inst.Light:SetIntensity(1)
+    inst.Light:SetRadius(1)
+    inst.Light:SetFalloff(0)
+    inst.Light:SetColour(1, 1, 1)
+	inst:DoPeriodicTask(1, function()
+		inst.Light:SetColour(inst.AnimState:GetMultColour())
+	end)
+	
+	inst:WatchWorldState("daytime", function()
+		inst.Light:Enable(true)
+	end, TheWorld)
+	
+	inst:WatchWorldState("nighttime", function()
+		inst.Light:Enable(false)
+	end, TheWorld)
+	
+	inst.Light:Enable(true)
+	TweenPink(inst)
 
     MakeHauntableDropFirstItem(inst)
     AddHauntableCustomReaction(inst, OnHaunt, false, false, true)
 
     inst.sounds = sounds
 
-    inst:SetStateGraph("SGchester")
+    inst:SetStateGraph("SGcoehort")
     inst.sg:GoToState("idle")
 
     inst:SetBrain(brain)
 	
 	inst.LinkToPlayer = LinkToPlayer
 
-    inst.ChesterState = "NORMAL"
-
     inst.OnSave = OnSave
-    inst.OnPreLoad = OnPreLoad
+    --inst.OnPreLoad = OnPreLoad
 
     return inst
 end

@@ -10,11 +10,13 @@ local assets = {
     Asset("SCRIPT", "scripts/prefabs/player_common.lua"),
 }
 local prefabs = {
-	"coehort"
+	"coehort",
+	"coehat"
 }
 
 -- Custom starting items
 local start_inv = {
+	"coehat"
 }
 
 -- When the character is revived from human
@@ -169,24 +171,24 @@ local master_postinit = function(player)
 	end)
 	
 	player:DoPeriodicTask(COE_DEPRESSION_CHANGE_TICK, function(inst)
-		print("Depression: " .. tostring(player.depressionlevel) .. " / " .. tostring(player.depressiontarget))
-		player.depressionlevel = player.depressionlevel + (COE_DEPRESSION_RATE * player.depressiondir)
+		print("Depression: " .. tostring(inst.depressionlevel) .. " / " .. tostring(inst.depressiontarget))
+		inst.depressionlevel = inst.depressionlevel + (COE_DEPRESSION_RATE * inst.depressiondir)
 		
-		if player.depressionlevel >= player.depressiontarget and player.depressiondir > 0 then
-			player.depressiondir = -1
-		elseif player.depressionlevel <= 0 and player.depressiondir < 0 then
-			player.depressionlevel = 0
-			player.depressiondir = 1
-			player.depressiontarget = math.random(15, COE_DEPRESSION_MAX_RATE * 100) / 100
+		if inst.depressionlevel >= inst.depressiontarget and inst.depressiondir > 0 then
+			inst.depressiondir = -1
+		elseif inst.depressionlevel <= 0 and inst.depressiondir < 0 then
+			inst.depressionlevel = 0
+			inst.depressiondir = 1
+			inst.depressiontarget = math.random(15, COE_DEPRESSION_MAX_RATE * 100) / 100
 			
-			if player.depressiontarget <= COE_DEPRESSION_MAX_RATE * .30 then
-				player.components.talker:Say("Things are looking up!", 2.5, true)
-			elseif player.depressiontarget <= COE_DEPRESSION_MAX_RATE * .60 then
-				player.components.talker:Say("Sorry guys, I'm just not feeling it today...", 2.5, true)
-			elseif player.depressiontarget < COE_DEPRESSION_MAX_RATE * .85 then
-				player.components.talker:Say("I want to feed chocolates to the dog that is my life.", 2.5, true)
+			if inst.depressiontarget <= COE_DEPRESSION_MAX_RATE * .30 then
+				inst.components.talker:Say("Things are looking up!", 2.5, true)
+			elseif inst.depressiontarget <= COE_DEPRESSION_MAX_RATE * .60 then
+				inst.components.talker:Say("Sorry guys, I'm just not feeling it today...", 2.5, true)
+			elseif inst.depressiontarget < COE_DEPRESSION_MAX_RATE * .85 then
+				inst.components.talker:Say("I want to feed chocolates to the dog that is my life.", 2.5, true)
 			else
-				player.components.talker:Say("I feel fantasitic!", 2.5, true)
+				inst.components.talker:Say("I feel fantasitic!", 2.5, true)
 			end
 		end
 	end)

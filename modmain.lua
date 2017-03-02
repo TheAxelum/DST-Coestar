@@ -1,6 +1,7 @@
 PrefabFiles = {
 	"coestar",
 	"coehort",
+	"coehat",
 	"coestar_none",
 }
 
