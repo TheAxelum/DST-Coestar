@@ -42,9 +42,7 @@ local states =
         onenter = function(inst)
             inst.SoundEmitter:PlaySound(SoundPath(inst, "die"))
             inst.AnimState:PlayAnimation("death")
-            inst.Physics:Stop()
-            RemovePhysicsColliders(inst)
-            inst.components.lootdropper:DropLoot(Vector3(inst.Transform:GetWorldPosition()))            
+            inst.Physics:Stop()          
         end,
     },
 

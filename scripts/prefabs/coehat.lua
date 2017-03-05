@@ -136,4 +136,4 @@ local function MakeHat(name)
 end
 
 
-return  MakeHat("coe")
+return MakeHat("coe")

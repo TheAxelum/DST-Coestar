@@ -4,6 +4,7 @@ local brain = require "brains/coehortbrain"
 local WAKE_TO_FOLLOW_DISTANCE = 14
 local SLEEP_NEAR_LEADER_DISTANCE = 7
 local COLOR_TWEEN_SPEED = 2
+local COEHORT_LIGHT_RADIUS = 8
 
 local assets =
 {
@@ -44,12 +45,12 @@ local sounds =
 }
 
 local function ShouldWakeUp(inst)
-    return DefaultWakeTest(inst) or not inst.components.follower:IsNearLeader(WAKE_TO_FOLLOW_DISTANCE)
+    return DefaultWakeTest(inst) or not inst._isnight
 end
 
 local function ShouldSleep(inst)
     --print(inst, "ShouldSleep", DefaultSleepTest(inst), not inst.sg:HasStateTag("open"), inst.components.follower:IsNearLeader(SLEEP_NEAR_LEADER_DISTANCE))
-    return DefaultSleepTest(inst) and not inst.sg:HasStateTag("open") and inst.components.follower:IsNearLeader(SLEEP_NEAR_LEADER_DISTANCE) and not TheWorld.state.isfullmoon
+    return DefaultSleepTest(inst) and inst._isnight and not inst.sg:HasStateTag("open") and not TheWorld.state.isfullmoon
 end
 
 local function ShouldKeepTarget()
@@ -66,17 +67,6 @@ local function OnClose(inst)
     if not inst.components.health:IsDead() and inst.sg.currentstate.name ~= "transition" then
         inst.sg:GoToState("close")
     end
-end
-
--- eye bone was killed/destroyed
-local function OnStopFollowing(inst)
-    --print("chester - OnStopFollowing")
-    inst:RemoveTag("companion")
-end
-
-local function OnStartFollowing(inst)
-    --print("chester - OnStartFollowing")
-    inst:AddTag("companion")
 end
 
 local function OnSave(inst, data)
@@ -116,9 +106,25 @@ local function TweenPink(inst)
 	end)
 end
 
+local function MaxLightRadius(inst)
+	if inst._playerlink then
+		local depression = inst._playerlink.depressiontarget
+		if TheWorld.state.isfullmoon or not inst._playerlink.depressed then
+			depression = 2
+		end
+		
+		print(COEHORT_LIGHT_RADIUS * math.abs(1 - depression))
+		
+		return (COEHORT_LIGHT_RADIUS * math.abs(1 - depression))
+	else
+		return COEHORT_LIGHT_RADIUS
+	end
+end
+
 local function create_chester()
     local inst = CreateEntity()
 
+	inst.name = "Chestar"
     inst.entity:AddTransform()
     inst.entity:AddAnimState()
     inst.entity:AddSoundEmitter()
@@ -131,7 +137,6 @@ local function create_chester()
     
 
     inst:AddTag("companion")
-    inst:AddTag("character")
     inst:AddTag("scarytoprey")
     inst:AddTag("notraptrigger")
     inst:AddTag("noauradamage")
@@ -148,12 +153,43 @@ local function create_chester()
     inst.Transform:SetFourFaced()
 
     inst.entity:SetPristine()
+	
+	inst._isnight = false
+	inst._lightrad = MaxLightRadius(inst)
+	
+	inst.entity:AddLight()
+    inst.Light:SetIntensity(.5)
+    inst.Light:SetRadius(inst._lightrad)
+    inst.Light:SetFalloff(1)
+    inst.Light:SetColour(1, 1, 1)
+	
+	inst.Light:Enable(true)
 
     if not TheWorld.ismastersim then
         return inst
     end
 	
     ------------------------------------------
+	
+	inst:DoPeriodicTask(.1, function()
+		inst.Light:SetColour(inst.AnimState:GetMultColour())
+		
+		if inst._isnight and inst._lightrad > 0 then
+			inst._lightrad = inst._lightrad - .01
+		elseif not inst._isnight and inst._lightrad < MaxLightRadius(inst) then
+			inst._lightrad = MaxLightRadius(inst)
+		end
+		
+		inst.Light:SetRadius(inst._lightrad)
+	end)
+	
+	inst:WatchWorldState("isday", function()
+		inst._isnight = false
+	end, TheWorld)
+	
+	inst:WatchWorldState("isnight", function()
+		inst._isnight = true
+	end, TheWorld)
 	
     inst:AddComponent("combat")
     inst.components.combat.hiteffectsymbol = "chester_body"
@@ -193,24 +229,6 @@ local function create_chester()
 	inst:ListenForEvent("tween_blue_end", TweenPink)
 	inst:ListenForEvent("tween_pink_end", TweenBlue)
 	
-	inst.entity:AddLight()
-    inst.Light:SetIntensity(1)
-    inst.Light:SetRadius(1)
-    inst.Light:SetFalloff(0)
-    inst.Light:SetColour(1, 1, 1)
-	inst:DoPeriodicTask(1, function()
-		inst.Light:SetColour(inst.AnimState:GetMultColour())
-	end)
-	
-	inst:WatchWorldState("daytime", function()
-		inst.Light:Enable(true)
-	end, TheWorld)
-	
-	inst:WatchWorldState("nighttime", function()
-		inst.Light:Enable(false)
-	end, TheWorld)
-	
-	inst.Light:Enable(true)
 	TweenPink(inst)
 
     MakeHauntableDropFirstItem(inst)

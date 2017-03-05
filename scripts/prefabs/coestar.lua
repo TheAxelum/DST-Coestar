@@ -23,6 +23,10 @@ local start_inv = {
 local function onbecamehuman(inst)
 	-- Set speed when reviving from ghost (optional)
 	inst.components.locomotor:SetExternalSpeedMultiplier(inst, "coestar_speed_mod", 1)
+
+	if inst.hascoehort then
+		inst.coehort:LinkToPlayer(inst)
+	end
 end
 
 local function onbecameghost(inst)
@@ -39,6 +43,7 @@ local function onload(inst, data)
         onbecameghost(inst)
     else
         onbecamehuman(inst)
+		
     end
 	
 	if data then
@@ -61,6 +66,7 @@ local function onload(inst, data)
 			inst.depressionlevel = data.depressionlevel
 			inst.depressiondir = data.depressiondir
 			inst.depressiontarget = data.depressiontarget
+			inst.depressed = data.depressed
 		end
 	end
 end
@@ -82,6 +88,7 @@ local function onsave(inst, data)
 		data.depressionlevel = inst.depressionlevel
 		data.depressiondir = inst.depressiondir
 		data.depressiontarget = inst.depressiontarget
+		data.depressed = inst.depressed
 	end
 end
 
@@ -115,6 +122,7 @@ local master_postinit = function(player)
 	player.depressionlevel = 0
 	player.depressiondir = 1
 	player.depressiontarget = .85
+	player.depressed = false
 	
 	-- Damage multiplier (optional)
     player.components.combat.damagemultiplier = 1
@@ -162,6 +170,30 @@ local master_postinit = function(player)
 		TheWorld:AddTag("coellectiontspawnlistener")
 	end
 	
+	player:WatchWorldState("isnight", function(inst)
+		
+		-- This triggers when there is a full moon - it will start #ScreamADay
+		inst:DoTaskInTime(1, function(inst)
+			if TheWorld.state.isfullmoon then
+				inst.components.talker:Say("Time for some #ScreamADay...")
+				
+				inst:DoTaskInTime(5, function(inst)
+					inst.components.sanity:SetInducedInsanity("screamaday", true)
+				end)
+			end
+		end)
+	end)
+	
+	player:WatchWorldState("isday", function(inst)
+		inst.components.sanity:SetInducedInsanity("screamaday", false)
+	end)
+	
+	TheWorld:DoPeriodicTask(1, function()
+		if TheWorld.state.isfullmoon then
+			TheWorld.net.components.clock:OnUpdate(-.25)
+		end
+	end)
+	
 	player:DoPeriodicTask(COE_DEPRESSION_TICK, function(inst)
 		if player.depressiontarget >= COE_DEPRESSION_MAX_RATE * .85 then
 			inst.components.sanity:DoDelta(.01, true)
@@ -180,6 +212,7 @@ local master_postinit = function(player)
 			inst.depressionlevel = 0
 			inst.depressiondir = 1
 			inst.depressiontarget = math.random(15, COE_DEPRESSION_MAX_RATE * 100) / 100
+			inst.depressed = true
 			
 			if inst.depressiontarget <= COE_DEPRESSION_MAX_RATE * .30 then
 				inst.components.talker:Say("Things are looking up!", 2.5, true)
@@ -189,6 +222,7 @@ local master_postinit = function(player)
 				inst.components.talker:Say("I want to feed chocolates to the dog that is my life.", 2.5, true)
 			else
 				inst.components.talker:Say("I feel fantasitic!", 2.5, true)
+				inst.depressed = false
 			end
 		end
 	end)
