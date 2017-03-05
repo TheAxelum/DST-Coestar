@@ -55,6 +55,19 @@ STRINGS.NAMES.COESTAR = "Coestar"
 
 AddMinimapAtlas("images/map_icons/coestar.xml")
 
+-- Override default widget setup for containers so that Coehort (and potentially other custom items) work on cave servers
+local containers = require("containers")
+local oldwidgetsetup = containers.widgetsetup
+local MyContainers = {
+	coehort = "treasurechest",
+}
+
+containers.widgetsetup = function(container, prefab, data)
+	prefab = MyContainers[prefab or container.inst.prefab] or prefab
+	oldwidgetsetup(container, prefab, data)
+end
+
+
 -- Add mod character to mod character list. Also specify a gender. Possible genders are MALE, FEMALE, ROBOT, NEUTRAL, and PLURAL.
 AddModCharacter("coestar", "MALE")
 

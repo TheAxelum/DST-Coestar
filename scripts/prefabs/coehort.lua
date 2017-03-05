@@ -177,7 +177,7 @@ local function create_chester()
     MakeSmallBurnableCharacter(inst, "chester_body")
 
     inst:AddComponent("container")
-    inst.components.container:WidgetSetup("icebox")
+    inst.components.container:WidgetSetup("treasurechest")
 	inst.components.container.onopenfn = OnOpen
     inst.components.container.onclosefn = OnClose
 

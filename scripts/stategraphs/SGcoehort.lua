@@ -109,7 +109,7 @@ local states =
 
 	State{
         name = "open",
-        tags = {"busy"},
+        tags = {"open", "busy"},
 
         ontimeout = function(inst)
             --inst.sg:GoToState("close")
