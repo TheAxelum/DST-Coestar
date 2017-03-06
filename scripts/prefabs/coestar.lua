@@ -115,7 +115,7 @@ local master_postinit = function(player)
     --inst.talker_path_override = "dontstarve_DLC001/characters/"
 	
 	-- Stats	
-	player.components.health:SetMaxHealth(150)
+	player.components.health:SetMaxHealth(200)
 	player.components.hunger:SetMax(200)
 	player.components.sanity:SetMax(200)
 	
@@ -153,6 +153,8 @@ local master_postinit = function(player)
 					player.hascoellection = true
 					local sack = SpawnPrefab("krampus_sack")
 					local x,y,z = player.Transform:GetWorldPosition()
+					sack.name = "The Coellection"
+					sack.components.inventoryitem.cangoincontainer = true
 					sack.Transform:SetPosition(x,y,z)
 					player.components.inventory:GiveItem(sack)
 				end
@@ -231,6 +233,15 @@ local master_postinit = function(player)
     player.OnNewSpawn = onload
 	player.OnDespawn = ondespawn
 	player.OnSave = onsave
+	
+	player:ListenForEvent("equip", function(inst)
+		local hat = inst.components.inventory:GetEquippedItem(EQUIPSLOTS.HEAD)
+		if hat and hat.prefab ~= "coehat" then
+			inst.components.inventory:DropItem(hat)
+			inst.components.inventory:Unequip(EQUIPSLOTS.HEAD, true)
+			inst.components.talker:Say("I'm not wearing that crap.")
+		end
+	end)
 	
 end
 

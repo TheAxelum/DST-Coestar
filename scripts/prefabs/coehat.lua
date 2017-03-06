@@ -19,6 +19,7 @@ local function MakeHat(name)
         else
             owner.AnimState:OverrideSymbol("swap_hat", build, "swap_hat")
         end
+		
         owner.AnimState:Show("HAT")
         owner.AnimState:Show("HAIR_HAT")
         owner.AnimState:Hide("HAIR_NOHAT")
@@ -28,6 +29,14 @@ local function MakeHat(name)
             owner.AnimState:Hide("HEAD")
             owner.AnimState:Show("HEAD_HAT")
         end
+		
+		-- Strike other players with lightning if they try to put on Coe's hat
+		inst:DoTaskInTime(1, function(inst)
+			if owner.prefab ~= "coestar" then
+				TheWorld:PushEvent("ms_sendlightningstrike", owner:GetPosition())
+				owner.components.inventory:DropItem(inst)
+			end
+		end)
 
 		inst._owner = owner
     end
@@ -110,6 +119,8 @@ local function MakeHat(name)
 
     local function coestar()
         local inst = simple(coestar_custom_init)
+		
+		inst.name = "Ancient Warrior Helm"
 
         if not TheWorld.ismastersim then
             return inst
