@@ -113,7 +113,7 @@ local function MaxLightRadius(inst)
 			depression = 2
 		end
 		
-		print(COEHORT_LIGHT_RADIUS * math.abs(1 - depression))
+		--print(COEHORT_LIGHT_RADIUS * math.abs(1 - depression))
 		
 		return (COEHORT_LIGHT_RADIUS * math.abs(1 - depression))
 	else

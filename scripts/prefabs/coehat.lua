@@ -3,23 +3,12 @@ local function MakeHat(name)
     local symname = name.."hat"
     local prefabname = symname
 
-    --If you want to use generic_perish to do more, it's still
-    --commented in all the relevant places below in this file.
-    --[[local function generic_perish(inst)
-        inst:Remove()
-    end]]
-
     local function onequip(inst, owner, fname_override)
         local build = fname_override or fname
 
-        local skin_build = inst:GetSkinBuild()
-        if skin_build ~= nil then
-            owner:PushEvent("equipskinneditem", inst:GetSkinName())
-            owner.AnimState:OverrideItemSkinSymbol("swap_hat", skin_build, "swap_hat", inst.GUID, build)
-        else
-            owner.AnimState:OverrideSymbol("swap_hat", build, "swap_hat")
-        end
-		
+        
+		owner.AnimState:OverrideSymbol("swap_hat", build, "swap_hat")
+        
         owner.AnimState:Show("HAT")
         owner.AnimState:Show("HAIR_HAT")
         owner.AnimState:Hide("HAIR_NOHAT")
@@ -42,10 +31,6 @@ local function MakeHat(name)
     end
 
     local function onunequip(inst, owner)
-        local skin_build = inst:GetSkinBuild()
-        if skin_build ~= nil then
-            owner:PushEvent("unequipskinneditem", inst:GetSkinName())
-        end
 
         owner.AnimState:ClearOverrideSymbol("swap_hat")
         owner.AnimState:Hide("HAT")
@@ -88,6 +73,8 @@ local function MakeHat(name)
         end
 
         inst:AddComponent("inventoryitem")
+		inst.components.inventoryitem.atlasname = "images/inventoryimages/"..fname..".xml"
+		
         inst:AddComponent("inspectable")
 
         inst:AddComponent("tradable")
@@ -126,6 +113,8 @@ local function MakeHat(name)
             return inst
         end
 		
+		
+		
         inst:AddComponent("armor")
         inst.components.armor:InitCondition(TUNING.ARMORGRASS, TUNING.ARMORGRASS_ABSORPTION)
 		
@@ -139,7 +128,7 @@ local function MakeHat(name)
 
 
     local fn = coestar
-    local assets = { Asset("ANIM", "anim/"..fname..".zip") }
+    local assets = { Asset("ANIM", "anim/"..fname..".zip"), Asset("ATLAS", "images/inventoryimages/"..fname..".xml") }
     local prefabs = nil
 
 

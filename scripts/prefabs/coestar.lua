@@ -184,6 +184,10 @@ local master_postinit = function(player)
 				end)
 			end
 		end)
+		
+		if TheWorld.state.isfullmoon then
+			inst.components.sanity:DoDelta(50)
+		end
 	end)
 	
 	player:WatchWorldState("isday", function(inst)
@@ -205,7 +209,7 @@ local master_postinit = function(player)
 	end)
 	
 	player:DoPeriodicTask(COE_DEPRESSION_CHANGE_TICK, function(inst)
-		print("Depression: " .. tostring(inst.depressionlevel) .. " / " .. tostring(inst.depressiontarget))
+		--print("Depression: " .. tostring(inst.depressionlevel) .. " / " .. tostring(inst.depressiontarget))
 		inst.depressionlevel = inst.depressionlevel + (COE_DEPRESSION_RATE * inst.depressiondir)
 		
 		if inst.depressionlevel >= inst.depressiontarget and inst.depressiondir > 0 then

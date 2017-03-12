@@ -44,7 +44,7 @@ local STRINGS = GLOBAL.STRINGS
 -- The character select screen lines
 STRINGS.CHARACTER_TITLES.coestar = "The Collector"
 STRINGS.CHARACTER_NAMES.coestar = "Coestar"
-STRINGS.CHARACTER_DESCRIPTIONS.coestar = "*Coecrates! They could contain anything!\n*Has a vast Coellection\n*Has a cool hat"
+STRINGS.CHARACTER_DESCRIPTIONS.coestar = "*Has a vast Coellection\n*Wears a cool hat\n*Thinks dark thoughts"
 STRINGS.CHARACTER_QUOTES.coestar = "\"Nooo! Fuck you! Fuck all of you! Fuck everyone! Fuck off!\""
 
 -- Custom speech strings
