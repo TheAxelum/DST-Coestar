@@ -3,18 +3,13 @@ local brain = require "brains/coehortbrain"
 
 local WAKE_TO_FOLLOW_DISTANCE = 14
 local SLEEP_NEAR_LEADER_DISTANCE = 7
-local COLOR_TWEEN_SPEED = 2
+local COLOR_TWEEN_SPEED = 5
 local COEHORT_LIGHT_RADIUS = 8
 
 local assets =
 {
     Asset("ANIM", "anim/ui_chester_shadow_3x4.zip"),
     Asset("ANIM", "anim/ui_chest_3x3.zip"),
-
-    Asset("ANIM", "anim/chester.zip"),
-    Asset("ANIM", "anim/chester_build.zip"),
-    Asset("ANIM", "anim/chester_shadow_build.zip"),
-    Asset("ANIM", "anim/chester_snow_build.zip"),
 
     Asset("SOUND", "sound/chester.fsb"),
 
@@ -92,7 +87,7 @@ end
 
 local function TweenBlue(inst)
 	inst.components.colourtweener:StartTween({.0828, .4020, 1, 1}, COLOR_TWEEN_SPEED, function()
-		inst:DoTaskInTime(1, function()
+		inst:DoTaskInTime(2, function()
 			inst:PushEvent("tween_blue_end")
 		end)
 	end)
@@ -100,7 +95,7 @@ end
 
 local function TweenPink(inst)
 	inst.components.colourtweener:StartTween({.4349, .2442 , .3209, 1}, COLOR_TWEEN_SPEED, function()
-		inst:DoTaskInTime(1, function()
+		inst:DoTaskInTime(2, function()
 			inst:PushEvent("tween_pink_end")
 		end)		
 	end)
@@ -218,8 +213,8 @@ local function create_chester()
     inst.components.container.onclosefn = OnClose
 
     inst:AddComponent("sleeper")
-    inst.components.sleeper:SetResistance(3)
-    inst.components.sleeper.testperiod = GetRandomWithVariance(6, 2)
+    inst.components.sleeper:SetResistance(0)
+    inst.components.sleeper.testperiod = 1
     inst.components.sleeper:SetSleepTest(ShouldSleep)
     inst.components.sleeper:SetWakeTest(ShouldWakeUp)
 	

@@ -110,7 +110,7 @@ local states =
         tags = {"open", "busy"},
 
         ontimeout = function(inst)
-            --inst.sg:GoToState("close")
+            inst.sg:GoToState("close")
         end,
 
         onenter = function(inst, start_anim)
@@ -125,7 +125,7 @@ local states =
         tags = {"busy"},
 
         ontimeout = function(inst)
-            --inst.sg:GoToState("idle")
+            inst.sg:GoToState("idle")
         end,
 
         onenter = function(inst, start_anim)
@@ -153,36 +153,6 @@ local states =
         events=
         {
             EventHandler("animover", function(inst) inst.sg:GoToState("idle") end),
-        },
-    },
-
-    State{
-        name = "hit",
-
-        onenter = function(inst)
-            inst.AnimState:PlayAnimation("hit")
-            inst.Physics:Stop()            
-        end,
-
-        events=
-        {
-            EventHandler("animover", function(inst) inst.sg:GoToState("idle") end ),
-        },
-    },
-
-    State{
-        name = "hit_stunlock",
-        tags = {"busy"},
-
-        onenter = function(inst)
-            inst.SoundEmitter:PlaySound(SoundPath(inst, "hit_response"))
-            inst.AnimState:PlayAnimation("hit")
-            inst.Physics:Stop()
-        end,
-
-        events=
-        {
-            EventHandler("animover", function(inst) inst.sg:GoToState("idle") end ),
         },
     },
 

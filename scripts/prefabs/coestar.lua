@@ -191,12 +191,14 @@ local master_postinit = function(player)
 	end)
 	
 	player:WatchWorldState("isday", function(inst)
+		TheWorld._coestarSlowTime = false
 		inst.components.sanity:SetInducedInsanity("screamaday", false)
 	end)
 	
 	TheWorld:DoPeriodicTask(1, function()
-		if TheWorld.state.isfullmoon then
+		if TheWorld.state.isfullmoon and not TheWorld._coestarSlowTime then
 			TheWorld.net.components.clock:OnUpdate(-.25)
+			TheWorld._coestarSlowTime = true
 		end
 	end)
 	
