@@ -96,6 +96,8 @@ AddPlayerPostInit(function(inst)
 					inst._themevolume = inst._themevolume - (THEME_MAX_VOLUME / 100)
 					print(inst._themevolume)
 					TheFocalPoint.SoundEmitter:SetVolume("screamaday", inst._themevolume)
+				else
+					TheFocalPoint.SoundEmitter:KillSound("screamaday")
 				end
 			end
 		end)
