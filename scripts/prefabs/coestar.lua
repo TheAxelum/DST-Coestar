@@ -1,22 +1,19 @@
 
 local MakePlayerCharacter = require "prefabs/player_common"
 
-local COE_DEPRESSION_RATE = .01
-local COE_DEPRESSION_TICK = 2
-local COE_DEPRESSION_CHANGE_TICK = 10
-local COE_DEPRESSION_MAX_RATE = 1
-
 local assets = {
     Asset("SCRIPT", "scripts/prefabs/player_common.lua"),
 }
 local prefabs = {
 	"coehort",
-	"coehat"
+	"coehat",
+	"coellection"
 }
 
 -- Custom starting items
 local start_inv = {
-	"coehat"
+	"coehat",
+	"coellection"
 }
 
 -- When the character is revived from human
@@ -62,12 +59,6 @@ local function onload(inst, data)
 			inst.hascoellection = data.hascoellection
 		end
 		
-		if data.depressionlevel then
-			inst.depressionlevel = data.depressionlevel
-			inst.depressiondir = data.depressiondir
-			inst.depressiontarget = data.depressiontarget
-			inst.depressed = data.depressed
-		end
 	end
 end
 
@@ -84,12 +75,6 @@ local function onsave(inst, data)
 		data.hascoellection = inst.hascoellection
 	end
 	
-	if inst.depressionlevel then
-		data.depressionlevel = inst.depressionlevel
-		data.depressiondir = inst.depressiondir
-		data.depressiontarget = inst.depressiontarget
-		data.depressed = inst.depressed
-	end
 end
 
 local function ondespawn(inst)
@@ -104,6 +89,8 @@ end
 local common_postinit = function(inst) 
 	-- Minimap icon
 	inst.MiniMapEntity:SetIcon( "coestar.tex" )
+	
+	
 end
 
 -- This initializes for the server only. Components are added here.
@@ -119,16 +106,13 @@ local master_postinit = function(player)
 	player.components.hunger:SetMax(200)
 	player.components.sanity:SetMax(200)
 	
-	player.depressionlevel = 0
-	player.depressiondir = 1
-	player.depressiontarget = .85
-	player.depressed = false
-	
 	-- Damage multiplier (optional)
     player.components.combat.damagemultiplier = 1
 	
 	-- Hunger rate (optional)
 	player.components.hunger.hungerrate = 1 * TUNING.WILSON_HUNGER_RATE
+	
+	player:AddComponent("depression")
 	
 	-- Spawn coehort if he doesn't exist
 	local SpawnCoehortFn = function(world, player)
@@ -145,100 +129,58 @@ local master_postinit = function(player)
 		end
 	end
 	
-	-- One time spawn of a krampus sack at Coe's feet when joining the game
-	local SpawnCoellectionFn = function(world, player)
-		if player then
-			player:DoTaskInTime(1,function(player)
-				if player.prefab == "coestar" and player.hascoellection ~= true then
-					player.hascoellection = true
-					local sack = SpawnPrefab("krampus_sack")
-					local x,y,z = player.Transform:GetWorldPosition()
-					sack.name = "The Coellection"
-					sack.components.inventoryitem.cangoincontainer = true
-					sack.Transform:SetPosition(x,y,z)
-					player.components.inventory:GiveItem(sack)
-				end
-			end)
-		end
-	end
+
 		
 	if TheWorld:HasTag("coehortspawnlistener") ~= true then
 		TheWorld:ListenForEvent("ms_playerjoined", SpawnCoehortFn) 
 		TheWorld:AddTag("coehortspawnlistener")
 	end
 	
-	if TheWorld:HasTag("coellectiontspawnlistener") ~= true then
-		TheWorld:ListenForEvent("ms_playerjoined", SpawnCoellectionFn) 
-		TheWorld:AddTag("coellectiontspawnlistener")
-	end
 	
 	player:WatchWorldState("isnight", function(inst)
 		
 		-- This triggers when there is a full moon - it will start #ScreamADay
 		inst:DoTaskInTime(1, function(inst)
-			if TheWorld.state.isfullmoon then
+			if TheWorld.state.isfullmoon and not inst:HasTag("playerghost") then
 				inst.components.talker:Say("Time for some #ScreamADay...")
 				
-				inst:DoTaskInTime(5, function(inst)
+				inst:DoTaskInTime(10, function(inst)
 					inst.components.sanity:SetInducedInsanity("screamaday", true)
+					TheWorld:AddTag("coestar_slowtime")
+					inst:AddTag("coestar_slowtime") -- TheWorld tag does not populate to client
+					inst:AddTag("play_themesong")
 				end)
 			end
 		end)
 		
-		if TheWorld.state.isfullmoon then
+		-- Fires after the full moon ends
+		if TheWorld.state.isfullmoon and not inst:HasTag("playerghost") then
 			inst.components.sanity:DoDelta(50)
 		end
 	end)
 	
 	player:WatchWorldState("isday", function(inst)
-		TheWorld._coestarSlowTime = false
+		TheWorld:RemoveTag("coestar_slowtime")
+		inst:RemoveTag("coestar_slowtime")
+		
 		inst.components.sanity:SetInducedInsanity("screamaday", false)
 	end)
 	
-	TheWorld:DoPeriodicTask(1, function()
-		if TheWorld.state.isfullmoon and not TheWorld._coestarSlowTime then
-			TheWorld.net.components.clock:OnUpdate(-.25)
-			TheWorld._coestarSlowTime = true
-		end
-	end)
-	
-	player:DoPeriodicTask(COE_DEPRESSION_TICK, function(inst)
-		if player.depressiontarget >= COE_DEPRESSION_MAX_RATE * .85 then
-			inst.components.sanity:DoDelta(.01, true)
-		else
-			inst.components.sanity:DoDelta(-player.depressionlevel, true)
-		end
-	end)
-	
-	player:DoPeriodicTask(COE_DEPRESSION_CHANGE_TICK, function(inst)
-		--print("Depression: " .. tostring(inst.depressionlevel) .. " / " .. tostring(inst.depressiontarget))
-		inst.depressionlevel = inst.depressionlevel + (COE_DEPRESSION_RATE * inst.depressiondir)
-		
-		if inst.depressionlevel >= inst.depressiontarget and inst.depressiondir > 0 then
-			inst.depressiondir = -1
-		elseif inst.depressionlevel <= 0 and inst.depressiondir < 0 then
-			inst.depressionlevel = 0
-			inst.depressiondir = 1
-			inst.depressiontarget = math.random(15, COE_DEPRESSION_MAX_RATE * 100) / 100
-			inst.depressed = true
-			
-			if inst.depressiontarget <= COE_DEPRESSION_MAX_RATE * .30 then
-				inst.components.talker:Say("Things are looking up!", 2.5, true)
-			elseif inst.depressiontarget <= COE_DEPRESSION_MAX_RATE * .60 then
-				inst.components.talker:Say("Sorry guys, I'm just not feeling it today...", 2.5, true)
-			elseif inst.depressiontarget < COE_DEPRESSION_MAX_RATE * .85 then
-				inst.components.talker:Say("I want to feed chocolates to the dog that is my life.", 2.5, true)
-			else
-				inst.components.talker:Say("I feel fantasitic!", 2.5, true)
-				inst.depressed = false
+	if not TheWorld:HasTag("coestar_slowtime_listener") then
+		TheWorld:AddTag("coestar_slowtime_listener")
+		TheWorld:DoPeriodicTask(1, function()
+			if TheWorld.state.isfullmoon and TheWorld:HasTag("coestar_slowtime") then
+				TheWorld.net.components.clock:OnUpdate(-.50)
 			end
-		end
-	end)
+		end)
+	end
 	
 	player.OnLoad = onload
     player.OnNewSpawn = onload
 	player.OnDespawn = ondespawn
 	player.OnSave = onsave
+	
+	
 	
 	player:ListenForEvent("equip", function(inst)
 		local hat = inst.components.inventory:GetEquippedItem(EQUIPSLOTS.HEAD)

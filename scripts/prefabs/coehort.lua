@@ -103,8 +103,8 @@ end
 
 local function MaxLightRadius(inst)
 	if inst._playerlink then
-		local depression = inst._playerlink.depressiontarget
-		if TheWorld.state.isfullmoon or not inst._playerlink.depressed then
+		local depression = inst._playerlink.components.depression.target
+		if TheWorld.state.isfullmoon or not inst._playerlink.components.depression.depressed then
 			depression = 2
 		end
 		

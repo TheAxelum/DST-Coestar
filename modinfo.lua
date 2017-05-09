@@ -1,8 +1,8 @@
 -- This information tells other players more about the mod
 name = "Coestar (Mindcrack)"
-description = "A character template for Don't Starve Together. Skins compatible version."
+description = "Play as Coestar, the coellector!\n\nFan made mod for the twitch streamer Coestar! Collect all the things with your massive inventory room and Chestar follower, survive in style with your unbreakable helm, and fight off your own inner demons. Relax, sit back, and enjoy... it's almost time for some #ScreamADay...\n\nTwitch: https://www.twitch.tv/coestar/\nTwitter: https://twitter.com/Coestar\nSong: https://mintpotion.bandcamp.com/track/small-window-bad-things-a-comin-coestar-halloween-theme-mp105"
 author = "The Modcrack Team"
-version = "0.0.1" -- This is the version of the template. Change it to your own number.
+version = "1.0.0" -- This is the version of the template. Change it to your own number.
 
 -- This is the URL name of the mod's thread on the forum; the part after the ? and before the first & in the url
 forumthread = "/files/file/950-extended-sample-character/"

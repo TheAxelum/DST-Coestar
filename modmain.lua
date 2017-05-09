@@ -2,6 +2,7 @@ PrefabFiles = {
 	"coestar",
 	"coehort",
 	"coehat",
+	"coellection",
 	"coestar_none",
 }
 
@@ -35,11 +36,15 @@ Assets = {
 	
     Asset( "IMAGE", "bigportraits/coestar_none.tex" ),
     Asset( "ATLAS", "bigportraits/coestar_none.xml" ),
+	
+	Asset( "SOUNDPACKAGE", "sound/theme.fev"),
+	Asset( "SOUND", "sound/theme_bank01.fsb"),
 
 }
 
 local require = GLOBAL.require
 local STRINGS = GLOBAL.STRINGS
+local THEME_MAX_VOLUME = 2
 
 -- The character select screen lines
 STRINGS.CHARACTER_TITLES.coestar = "The Collector"
@@ -60,6 +65,7 @@ local containers = require("containers")
 local oldwidgetsetup = containers.widgetsetup
 local MyContainers = {
 	coehort = "treasurechest",
+	coellection = "krampus_sack"
 }
 
 containers.widgetsetup = function(container, prefab, data)
@@ -67,6 +73,35 @@ containers.widgetsetup = function(container, prefab, data)
 	oldwidgetsetup(container, prefab, data)
 end
 
+
+AddPlayerPostInit(function(inst)
+	local TheFocalPoint = GLOBAL.TheFocalPoint
+	local TheWorld = GLOBAL.TheWorld
+	
+	if inst.prefab == "coestar" then
+		inst._themevolume = THEME_MAX_VOLUME
+		
+		inst:DoPeriodicTask(.1, function(inst)
+			--print(inst:HasTag("play_themesong"))
+			if inst:HasTag("play_themesong") then
+				inst:RemoveTag("play_themesong")
+				print("Playing Themesong")
+				inst._themevolume = THEME_MAX_VOLUME
+				TheFocalPoint.SoundEmitter:PlaySound("theme/sound/music", "screamaday")
+				TheFocalPoint.SoundEmitter:SetVolume("screamaday", inst._themevolume)
+			end
+		
+			if not TheWorld.state.isfullmoon and not inst:HasTag("coestar_slowtime") then
+				if inst._themevolume > 0 then
+					inst._themevolume = inst._themevolume - (THEME_MAX_VOLUME / 100)
+					print(inst._themevolume)
+					TheFocalPoint.SoundEmitter:SetVolume("screamaday", inst._themevolume)
+				end
+			end
+		end)
+		
+	end
+end)
 
 -- Add mod character to mod character list. Also specify a gender. Possible genders are MALE, FEMALE, ROBOT, NEUTRAL, and PLURAL.
 AddModCharacter("coestar", "MALE")
