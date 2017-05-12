@@ -83,21 +83,26 @@ AddPlayerPostInit(function(inst)
 		
 		inst:DoPeriodicTask(.1, function(inst)
 			--print(inst:HasTag("play_themesong"))
-			if inst:HasTag("play_themesong") then
-				inst:RemoveTag("play_themesong")
+			if inst:HasTag("play_themesong") and not inst:HasTag("themesong_playing") then
 				print("Playing Themesong")
 				inst._themevolume = THEME_MAX_VOLUME
-				TheFocalPoint.SoundEmitter:PlaySound("theme/sound/music", "screamaday")
-				TheFocalPoint.SoundEmitter:SetVolume("screamaday", inst._themevolume)
+				inst.SoundEmitter:SetVolume("screamaday", inst._themevolume)
+				inst.SoundEmitter:PlaySound("theme/sound/music", "screamaday")
+				inst.SoundEmitter:SetVolume("screamaday", inst._themevolume)
+				inst:AddTag("themesong_playing")
 			end
 		
 			if not TheWorld.state.isfullmoon and not inst:HasTag("coestar_slowtime") then
-				if inst._themevolume > 0 then
+				if inst._themevolume > 0 and inst:HasTag("themesong_playing") then
 					inst._themevolume = inst._themevolume - (THEME_MAX_VOLUME / 100)
 					print(inst._themevolume)
-					TheFocalPoint.SoundEmitter:SetVolume("screamaday", inst._themevolume)
-				else
-					TheFocalPoint.SoundEmitter:KillSound("screamaday")
+					inst.SoundEmitter:SetVolume("screamaday", inst._themevolume)
+				elseif inst:HasTag("themesong_playing") then
+					print("Killing Sound")
+					inst.SoundEmitter:KillSound("screamaday")
+					inst:RemoveTag("play_themesong")
+					inst:RemoveTag("themesong_playing")
+					inst._themevolume = THEME_MAX_VOLUME
 				end
 			end
 		end)

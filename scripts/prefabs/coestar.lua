@@ -147,8 +147,6 @@ local master_postinit = function(player)
 				inst:DoTaskInTime(10, function(inst)
 					inst.components.sanity:SetInducedInsanity("screamaday", true)
 					TheWorld:AddTag("coestar_slowtime")
-					inst:AddTag("coestar_slowtime") -- TheWorld tag does not populate to client
-					inst:AddTag("play_themesong")
 				end)
 			end
 		end)
@@ -161,7 +159,7 @@ local master_postinit = function(player)
 	
 	player:WatchWorldState("isday", function(inst)
 		TheWorld:RemoveTag("coestar_slowtime")
-		inst:RemoveTag("coestar_slowtime")
+		inst:RemoveTag("play_themesong")
 		
 		inst.components.sanity:SetInducedInsanity("screamaday", false)
 	end)
@@ -171,6 +169,7 @@ local master_postinit = function(player)
 		TheWorld:DoPeriodicTask(1, function()
 			if TheWorld.state.isfullmoon and TheWorld:HasTag("coestar_slowtime") then
 				TheWorld.net.components.clock:OnUpdate(-.50)
+				player:AddTag("play_themesong")
 			end
 		end)
 	end

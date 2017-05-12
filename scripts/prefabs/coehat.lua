@@ -17,6 +17,8 @@ local function MakeHat(name)
         if owner:HasTag("player") then
             owner.AnimState:Hide("HEAD")
             owner.AnimState:Show("HEAD_HAT")
+			owner._lightningchance = owner.components.playerlightningtarget:GetHitChance()
+			owner.components.playerlightningtarget:SetHitChance(1)
         end
 		
 		-- Strike other players with lightning if they try to put on Coe's hat
@@ -41,6 +43,7 @@ local function MakeHat(name)
         if owner:HasTag("player") then
             owner.AnimState:Show("HEAD")
             owner.AnimState:Hide("HEAD_HAT")
+			owner.components.playerlightningtarget:SetHitChance(owner._lightningchance)
         end
 		
 		inst._owner = nil
