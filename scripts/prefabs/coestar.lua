@@ -153,7 +153,17 @@ local master_postinit = function(player)
 		
 		-- Fires after the full moon ends
 		if TheWorld.state.isfullmoon and not inst:HasTag("playerghost") then
+			local x, y, z = inst.Transform:GetWorldPosition()
 			inst.components.sanity:DoDelta(50)
+			
+			local shadows = TheSim:FindEntities(x, y, z, 30,
+				{ "_combat", "_health" },
+				{ "character", "INLIMBO", "glommer", "companion" },
+				{ "shadow", "shadowcreature" })
+				
+			for i, shadow in ipairs(shadows) do
+				shadow.components.combat:DropTarget(false)
+			end
 		end
 	end)
 	
