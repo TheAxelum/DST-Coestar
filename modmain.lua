@@ -86,9 +86,9 @@ AddPlayerPostInit(function(inst)
 			if inst:HasTag("play_themesong") and not inst:HasTag("themesong_playing") then
 				print("Playing Themesong")
 				inst._themevolume = THEME_MAX_VOLUME
-				TheFocalPoint.SoundEmitter:SetVolume("screamaday", inst._themevolume)
-				TheFocalPoint.SoundEmitter:PlaySound("theme/sound/music", "screamaday")
-				TheFocalPoint.SoundEmitter:SetVolume("screamaday", inst._themevolume)
+				inst.SoundEmitter:SetVolume("screamaday", inst._themevolume)
+				inst.SoundEmitter:PlaySound("theme/sound/music", "screamaday")
+				inst.SoundEmitter:SetVolume("screamaday", inst._themevolume)
 				inst:AddTag("themesong_playing")
 			end
 		
@@ -96,10 +96,10 @@ AddPlayerPostInit(function(inst)
 				if inst._themevolume > 0 and inst:HasTag("themesong_playing") then
 					inst._themevolume = inst._themevolume - (THEME_MAX_VOLUME / 100)
 					print(inst._themevolume)
-					TheFocalPoint.SoundEmitter:SetVolume("screamaday", inst._themevolume)
+					inst.SoundEmitter:SetVolume("screamaday", inst._themevolume)
 				elseif inst:HasTag("themesong_playing") then
 					print("Killing Sound")
-					TheFocalPoint.SoundEmitter:KillSound("screamaday")
+					inst.SoundEmitter:KillSound("screamaday")
 					inst:RemoveTag("play_themesong")
 					inst:RemoveTag("themesong_playing")
 					inst._themevolume = THEME_MAX_VOLUME
@@ -107,7 +107,7 @@ AddPlayerPostInit(function(inst)
 			end
 		end)
 	elseif inst:HasTag("player") then
-		TheFocalPoint.SoundEmitter:SetVolume("screamaday", 0)
+		inst.SoundEmitter:SetVolume("screamaday", 0)
 	end
 end)
 
