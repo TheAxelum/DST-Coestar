@@ -73,13 +73,32 @@ containers.widgetsetup = function(container, prefab, data)
 	oldwidgetsetup(container, prefab, data)
 end
 
+local function ServerStatus()
+	local q = {}
+	local TheNet = GLOBAL.TheNet
+	
+	if TheNet:GetIsServer() then
+		q.SERVER_SIDE = true
+		if TheNet:IsDedicated() then
+			q.DEDICATED_SIDE = true
+		else
+			q.CLIENT_SIDE = true
+		end
+	elseif TheNet:GetIsClient() then
+		q.SERVER_SIDE = false
+		q.CLIENT_SIDE = true
+		q.ONLY_CLIENT_SIDE = true
+	end
+	
+	return q
+end
 
 AddPlayerPostInit(function(inst)
 	local TheFocalPoint = GLOBAL.TheFocalPoint
 	local TheWorld = GLOBAL.TheWorld
-	local TheNet = GLOBAL.TheNet
+	local server = ServerStatus()
 	
-	if inst.prefab == "coestar" and TheNet:GetIsClient() then
+	if inst.prefab == "coestar" and server.CLIENT_SIDE then
 		inst._themevolume = THEME_MAX_VOLUME
 		inst._themesongplaying = false
 		
