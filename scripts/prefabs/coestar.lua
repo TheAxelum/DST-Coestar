@@ -145,8 +145,10 @@ local master_postinit = function(player)
 				inst.components.talker:Say("Time for some #ScreamADay...")
 				
 				inst:DoTaskInTime(10, function(inst)
+					inst.components.talker:Say("coeHype!")
 					inst.components.sanity:SetInducedInsanity("screamaday", true)
 					TheWorld:AddTag("coestar_slowtime")
+					inst:AddTag("play_themesong")
 				end)
 			end
 		end)
@@ -178,8 +180,7 @@ local master_postinit = function(player)
 		TheWorld:AddTag("coestar_slowtime_listener")
 		TheWorld:DoPeriodicTask(1, function()
 			if TheWorld.state.isfullmoon and TheWorld:HasTag("coestar_slowtime") then
-				TheWorld.net.components.clock:OnUpdate(-.50)
-				player:AddTag("play_themesong")
+				TheWorld.net.components.clock:OnUpdate(-0.5)
 			end
 		end)
 	end

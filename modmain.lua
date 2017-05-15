@@ -77,37 +77,36 @@ end
 AddPlayerPostInit(function(inst)
 	local TheFocalPoint = GLOBAL.TheFocalPoint
 	local TheWorld = GLOBAL.TheWorld
+	local TheNet = GLOBAL.TheNet
 	
-	if inst.prefab == "coestar" then
+	if inst.prefab == "coestar" and TheNet:GetIsClient() then
 		inst._themevolume = THEME_MAX_VOLUME
+		inst._themesongplaying = false
 		
 		inst:DoPeriodicTask(.1, function(inst)
-			--print(inst:HasTag("play_themesong"))
-			if inst:HasTag("play_themesong") and not inst:HasTag("themesong_playing") then
+			if inst:HasTag("play_themesong") and not inst._themesongplaying then
 				print("Playing Themesong")
 				inst._themevolume = THEME_MAX_VOLUME
 				inst.SoundEmitter:SetVolume("screamaday", inst._themevolume)
 				inst.SoundEmitter:PlaySound("theme/sound/music", "screamaday")
 				inst.SoundEmitter:SetVolume("screamaday", inst._themevolume)
-				inst:AddTag("themesong_playing")
+				inst._themesongplaying = true
+				inst:RemoveTag("play_themesong")
 			end
 		
-			if not TheWorld.state.isfullmoon and not inst:HasTag("coestar_slowtime") then
-				if inst._themevolume > 0 and inst:HasTag("themesong_playing") then
+			if not TheWorld.state.isfullmoon then
+				if inst._themevolume > 0 and inst._themesongplaying then
 					inst._themevolume = inst._themevolume - (THEME_MAX_VOLUME / 100)
 					print(inst._themevolume)
 					inst.SoundEmitter:SetVolume("screamaday", inst._themevolume)
-				elseif inst:HasTag("themesong_playing") then
+				elseif inst._themesongplaying then
 					print("Killing Sound")
 					inst.SoundEmitter:KillSound("screamaday")
-					inst:RemoveTag("play_themesong")
-					inst:RemoveTag("themesong_playing")
+					inst._themesongplaying = false
 					inst._themevolume = THEME_MAX_VOLUME
 				end
 			end
 		end)
-	elseif inst:HasTag("player") then
-		inst.SoundEmitter:SetVolume("screamaday", 0)
 	end
 end)
 
