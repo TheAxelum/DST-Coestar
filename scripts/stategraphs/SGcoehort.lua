@@ -57,7 +57,7 @@ local states =
 
         timeline=
         {
-            TimeEvent(3*FRAMES, function(inst) inst.SoundEmitter:PlaySound(SoundPath(inst, "walk_spider")) end),
+            TimeEvent(3*FRAMES, function(inst) end),
         },
 
         events=
@@ -77,10 +77,10 @@ local states =
 
         timeline=
         {
-            TimeEvent(0*FRAMES, function(inst) inst.SoundEmitter:PlaySound(SoundPath(inst, "walk_spider")) end),
-            TimeEvent(3*FRAMES, function(inst) inst.SoundEmitter:PlaySound(SoundPath(inst, "walk_spider")) end),
-            TimeEvent(7*FRAMES, function(inst) inst.SoundEmitter:PlaySound(SoundPath(inst, "walk_spider")) end),
-            TimeEvent(12*FRAMES, function(inst) inst.SoundEmitter:PlaySound(SoundPath(inst, "walk_spider")) end),
+            TimeEvent(0*FRAMES, function(inst) end),
+            TimeEvent(3*FRAMES, function(inst) end),
+            TimeEvent(7*FRAMES, function(inst) end),
+            TimeEvent(12*FRAMES, function(inst) end),
         },
 
         events=
@@ -116,7 +116,6 @@ local states =
         onenter = function(inst, start_anim)
             inst.Physics:Stop()
             inst.AnimState:PlayAnimation("taunt")
-            inst.SoundEmitter:PlaySound(SoundPath(inst, "scream"))
         end,
     },
 
@@ -131,7 +130,6 @@ local states =
         onenter = function(inst, start_anim)
             inst.Physics:Stop()
             inst.AnimState:PlayAnimation("eat")
-            inst.SoundEmitter:PlaySound(SoundPath(inst, "scream"))
         end,
 		
 		events=
@@ -147,7 +145,6 @@ local states =
         onenter = function(inst)
             inst.Physics:Stop()
             inst.AnimState:PlayAnimation("taunt")
-            inst.SoundEmitter:PlaySound(SoundPath(inst, "scream"))
         end,
 
         events=
@@ -161,14 +158,14 @@ local states =
 CommonStates.AddSleepStates(states,
 {
     starttimeline = {
-        TimeEvent(0*FRAMES, function(inst) inst.SoundEmitter:PlaySound(SoundPath(inst, "fallAsleep")) end ),
+        TimeEvent(0*FRAMES, function(inst) end ),
     },
     sleeptimeline = 
     {
-        TimeEvent(35*FRAMES, function(inst) inst.SoundEmitter:PlaySound(SoundPath(inst, "sleeping")) end ),
+        TimeEvent(35*FRAMES, function(inst) end ),
     },
     waketimeline = {
-        TimeEvent(0*FRAMES, function(inst) inst.SoundEmitter:PlaySound(SoundPath(inst, "wakeUp")) end ),
+        TimeEvent(0*FRAMES, function(inst) end ),
     },
 })
 CommonStates.AddFrozenStates(states)
