@@ -16,6 +16,35 @@ local start_inv = {
 	"coellection"
 }
 
+local function caveCheckFn(inst)
+    inst:DoPeriodicTask(1, function(inst)
+      if TheWorld:HasTag("coestar_slowtime") then
+        local x,y,z = inst.Transform:GetWorldPosition()
+        local nearbyEnts = TheSim:FindEntities(x, y, z, 15)
+        for i, v in ipairs(nearbyEnts) do
+          if v.prefab == 'cave_entrance' then
+            local coePos = inst:GetPosition()
+            if inst.components.locomotor ~= nil then
+              inst.components.locomotor:StopMoving()
+            end
+            local caveX, caveY, caveZ = v.Transform:GetWorldPosition()
+            local dy = math.abs(y-caveY)
+            local dx = math.abs(x-caveX)
+            local angleTo = math.atan2(dy,dx)
+            local diff = math.sqrt(dy*dy+dx*dx)
+            local offset = FindWalkableOffset(v:GetPosition(), angleTo, diff*1.25, 10, false, true)
+            --FindWalkableOffset(position, start_angle (rads), radius, attempts, check_los, ignore_walls, customcheckfn)
+            if offset then
+              coePos = coePos + offset
+              inst.Transform:SetPosition(coePos:Get())
+              inst.components.talker:Say("Hell no, #ScreamADay's scary enough above ground")
+            end
+          end
+        end
+      end
+    end)
+  end
+
 -- When the character is revived from human
 local function onbecamehuman(inst)
 	-- Set speed when reviving from ghost (optional)
@@ -141,28 +170,12 @@ local master_postinit = function(player)
 		inst:DoTaskInTime(1, function(inst)
 			if TheWorld.state.isfullmoon and not inst:HasTag("playerghost") then
 				inst.components.talker:Say("Time for some #ScreamADay...")
-				
 				inst:DoTaskInTime(10, function(inst)
 					inst.components.talker:Say("coeHype!")
 					inst.components.sanity:SetInducedInsanity("screamaday", true)
 					TheWorld:AddTag("coestar_slowtime")
+          caveCheckFn(inst)
 					inst:AddTag("play_themesong")
-				end)
-      
-				inst:DoPeriodicTask(1, function(inst)
-					local x,y,z = inst.Transform:GetWorldPosition()
-					local nearbyEnts = TheSim:FindEntities(x, y, z, 15)
-					for i, v in ipairs(nearbyEnts) do
-						if v.prefab == 'cave_entrance' then
-							local coePos = inst:GetPosition()
-							local offset = FindWalkableOffset(v:GetPosition(), math.random() * 20 * math.pi, math.random(20*(math.random()+1),20*(math.random()+1)), 20)
-							if offset then
-								coePos = coePos + offset
-								inst.Transform:SetPosition(coePos:Get())
-								inst.components.talker:Say("Hell no, #ScreamADay's scary enough above ground")
-							end
-						end
-					end
 				end)
 			end
 		end)
