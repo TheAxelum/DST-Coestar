@@ -89,8 +89,6 @@ end
 local common_postinit = function(inst) 
 	-- Minimap icon
 	inst.MiniMapEntity:SetIcon( "coestar.tex" )
-	
-	
 end
 
 -- This initializes for the server only. Components are added here.
@@ -150,6 +148,22 @@ local master_postinit = function(player)
 					TheWorld:AddTag("coestar_slowtime")
 					inst:AddTag("play_themesong")
 				end)
+      
+        inst:DoPeriodicTask(1, function(inst)
+          local x,y,z = inst.Transform:GetWorldPosition()
+          local nearbyEnts = TheSim:FindEntities(x, y, z, 15)
+          for i, v in ipairs(nearbyEnts) do
+            if v.prefab == 'cave_entrance' then
+              local coePos = inst:GetPosition()
+              local offset = FindWalkableOffset(v:GetPosition(), math.random() * 20 * math.pi, math.random(20*(math.random()+1),20*(math.random()+1)), 20)
+              if offset then
+                coePos = coePos + offset
+                inst.Transform:SetPosition(coePos:Get())
+                inst.components.talker:Say("Hell no, #ScreamADay's scary enough above ground")
+              end
+            end
+          end
+        end)
 			end
 		end)
 		
