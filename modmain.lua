@@ -129,6 +129,30 @@ AddPlayerPostInit(function(inst)
 	end
 end)
 
+GLOBAL.TheInput:AddKeyDownHandler(GLOBAL.KEY_T, function()
+	local player=GLOBAL.ThePlayer
+	if player and player.prefab=="coestar"
+    and not GLOBAL.IsPaused() and not GLOBAL.TheInput:IsKeyDown(GLOBAL.KEY_CTRL) and not GLOBAL.TheInput:IsKeyDown(GLOBAL.KEY_SHIFT)
+    and not player.HUD:IsChatInputScreenOpen() and not player.HUD:IsConsoleScreenOpen()then
+		SendModRPCToServer(MOD_RPC[modname]["say_quote"])
+	end
+end)
+
+AddModRPCHandler(modname, "say_quote", function(player)
+	local quotes = GLOBAL.json.decode(require("quotes"))
+	local number = math.random(#quotes)
+	
+	if not player:HasTag("quoting") then
+		
+		player:AddTag("quoting")
+		player.components.talker:Say(quotes[number]["quote"], 2.5)
+		player:DoTaskInTime(2, function(player)
+			player.components.talker:Say(quotes[number]["quote"], 2.5, true)
+			player:RemoveTag("quoting")
+		end)
+	end
+end)
+
 -- Add mod character to mod character list. Also specify a gender. Possible genders are MALE, FEMALE, ROBOT, NEUTRAL, and PLURAL.
 AddModCharacter("coestar", "MALE")
 
