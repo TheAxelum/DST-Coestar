@@ -910,7 +910,7 @@ return {
 		KABOBS = "I cooked it myself!",
 		KILLERBEE =
 		{
-			GENERIC = "Oh no! Why can't it isn't a killer bat!",
+			GENERIC = "Oh no! Why can't it be a killer bat!",
 			HELD = "This seems dangerous.",
 		},
 		KNIGHT = "Check it out!",
